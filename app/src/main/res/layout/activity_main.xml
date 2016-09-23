@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@mipmap/main_bg"
+    android:orientation="vertical">
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="260dp"
+        android:background="@mipmap/sendimages"
+        android:gravity="bottom|center_horizontal"
+        android:paddingBottom="@dimen/width_3"
+        android:text="SMMS"
+        android:textColor="@color/black"
+        android:textSize="40sp"
+        android:textStyle="italic" />
+
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/imports"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:background="@drawable/bg_for_btn"
+                android:text="导入数据"
+                android:textColor="@color/white"
+                android:textSize="20sp"/>
+
+            <Button
+                android:id="@+id/send"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="2"
+                android:background="@drawable/bg_for_btntwo"
+                android:text="发送短信"
+                android:textColor="@color/white"
+                android:textSize="20sp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/reply"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="2"
+                android:background="@drawable/bg_for_btnthree"
+                android:text="接收回复"
+                android:textColor="@color/white"
+                android:textSize="20sp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/export"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="3"
+                android:background="@drawable/bg_for_btnfour"
+                android:text="导出数据"
+                android:textColor="@color/white"
+                android:textSize="20sp"/>
+
+            <Button
+                android:id="@+id/db_operation"
+                android:layout_width="0dp"
+                android:layout_height="fill_parent"
+                android:layout_weight="2"
+                android:background="@drawable/bg_for_btn"
+                android:text="数据库操作"
+                android:textColor="@color/white"
+                android:textSize="20sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/window_bg"
+    android:orientation="vertical" >
+
+    <EditText
+        android:id="@+id/editText_name"
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/height_5"
+        android:background="@color/color_bg_rb_notice_checked"
+        android:hint="请输入导出的文件的名称"
+        android:paddingLeft="@dimen/width_2"
+        android:textSize="14sp" />
+
+    <TextView
+        android:id="@+id/parent_folder"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/window_bg"
+        android:drawableLeft="@mipmap/folder"
+        android:gravity="left|center_vertical"
+        android:textColor="#000000"
+        android:text="..."
+        android:textSize="14sp" />
+
+    <View style="@style/horizontal_line_board" />
+
+    <ListView
+        android:id="@+id/file_list"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/window_bg" >
+    </ListView>
+
+</LinearLayout>

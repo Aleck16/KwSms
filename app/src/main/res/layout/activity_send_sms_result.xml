@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+
+    <TextView
+        android:id="@+id/textView_send_num"
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/height_5"
+        android:background="@color/color_bg_rb_notice_checked"
+        android:gravity="center"
+        android:textColor="#000000"
+        android:textSize="15sp" />
+
+    <ListView
+        android:id="@+id/listView_send_sms"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="@color/window_bg" >
+    </ListView>
+
+    <RadioGroup
+        android:id="@+id/radio_group_send"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@color/black"
+        android:baselineAligned="false"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="3dp" >
+
+        <RadioButton
+            android:id="@+id/rb_not_send"
+            android:layout_weight="1"
+            android:layout_height="match_parent"
+            android:layout_width="0dp"
+            android:button="@null"
+            android:checked="true"
+            android:gravity="center"
+            android:text="还未发送"
+            android:textColor="@color/color_tab_pc"
+            android:textSize="15sp" />
+
+        <RadioButton
+            android:id="@+id/rb_send_success"
+            android:layout_height="match_parent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:button="@null"
+            android:gravity="center"
+            android:text="发送成功"
+            android:textColor="@color/color_tab_pc"
+            android:textSize="15sp" />
+
+        <RadioButton
+            android:id="@+id/rb_accept_false"
+            android:layout_height="match_parent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:button="@null"
+            android:gravity="center"
+            android:text="接受失败"
+            android:textColor="@color/color_tab_pc"
+            android:textSize="15sp" />
+
+        <RadioButton
+            android:id="@+id/rb_send_false"
+            android:layout_height="match_parent"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:button="@null"
+            android:gravity="center"
+            android:text="发送失败"
+            android:textColor="@color/color_tab_pc"
+            android:textSize="15sp" />
+    </RadioGroup>
+
+</LinearLayout>

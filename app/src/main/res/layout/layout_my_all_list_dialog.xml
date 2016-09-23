@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/textView_opration_name"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="@dimen/height_2"
+        android:text="请选择专家"
+        android:textColor="@color/black"
+        android:textSize="17sp" />
+
+    <View style="@style/horizontal_line_board" />
+
+    <ListView
+        android:id="@+id/listView_opration"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:divider="@color/divider_color" >
+    </ListView>
+
+</LinearLayout>

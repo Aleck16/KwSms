@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/window_bg"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/textView_num"
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/height_5"
+        android:background="@color/color_bg_rb_notice_checked"
+        android:gravity="center"
+        android:textColor="#000000"
+        android:textSize="14sp" />
+
+    <ListView
+        android:id="@+id/listView_reply_sms"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1" />
+
+    <ListView
+        android:id="@+id/listView_no_reply_sms"
+        android:layout_width="fill_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone" />
+
+    <RadioGroup
+        android:id="@+id/radio_group_reply"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:background="@color/black"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:paddingTop="3dp">
+
+        <RadioButton
+            android:id="@+id/rb_reply_unknown"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.0"
+            android:button="@null"
+            android:checked="true"
+            android:gravity="center"
+            android:text="无法匹配"
+            android:textColor="@color/color_tab_pc"
+            android:textSize="14sp" />
+
+        <RadioButton
+            android:id="@+id/rb_no_reply"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.0"
+            android:button="@null"
+            android:gravity="center"
+            android:text="未回复"
+            android:textColor="@color/color_tab_pc"
+            android:textSize="14sp" />
+
+        <RadioButton
+            android:id="@+id/rb_reply_other"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.0"
+            android:button="@null"
+            android:gravity="center"
+            android:text="回复其它"
+            android:textColor="@color/color_tab_pc"
+            android:textSize="14sp" />
+
+        <RadioButton
+            android:id="@+id/rb_reply_yes"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.0"
+            android:button="@null"
+            android:gravity="center"
+            android:text="回复Y"
+            android:textColor="@color/color_tab_pc"
+            android:textSize="14sp" />
+
+        <RadioButton
+            android:id="@+id/rb_reply_no"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.0"
+            android:button="@null"
+            android:gravity="center"
+            android:text="回复N"
+            android:textColor="@color/color_tab_pc"
+            android:textSize="14sp" />
+    </RadioGroup>
+
+</LinearLayout>

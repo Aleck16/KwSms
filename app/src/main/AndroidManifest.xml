@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="cn.edu.hebut.iscs.kwsms">
+
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.WRITE_SMS" />
+    <uses-permission android:name="android.permission.RECEIVE_SMS" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity android:name=".MainActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".QueryExcelActivity"
+            android:label="@string/app_name"/>
+        <activity
+            android:name=".BaseTitleActivity"
+            android:label="@string/app_name"/>
+        <activity
+            android:name=".ImportExcelActivity"
+            android:label="@string/app_name"/>
+        <activity
+            android:name=".SendSmsResultActivity"
+            android:label="@string/app_name"/>
+        <activity
+            android:name=".DbOperationActivity"
+            android:label="@string/app_name"/>
+        <activity
+            android:name=".ExportExcelActivity"
+            android:label="@string/app_name"/>
+        <activity
+            android:name=".ShowReplySmsActivity"
+            android:label="@string/app_name"/>
+        <service
+            android:name="cn.edu.hebut.iscs.kwsms.service.SmsService" >
+            <intent-filter>
+                <action android:name="cn.edu.hebut.iscs.sms_service" />
+            </intent-filter>
+        </service>
+    </application>
+
+</manifest>

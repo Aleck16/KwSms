@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="@dimen/width_50"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/width_1"
+        android:layout_marginTop="@dimen/width_2"
+        android:gravity="center"
+        android:text="温馨提示"
+        android:textColor="@color/black"
+        android:textSize="18sp" />
+
+    <View style="@style/horizontal_line_main_color" />
+
+    <ImageView
+        android:id="@+id/loadingImageView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_margin="@dimen/height_1"
+        android:background="@mipmap/spinner_black_48"
+        android:contentDescription="@string/action_settings" />
+
+    <TextView
+        android:id="@+id/id_tv_loadingmsg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="@dimen/height_2"
+        android:text=""
+        android:textColor="@color/black"
+        android:textSize="16sp" />
+
+</LinearLayout>
