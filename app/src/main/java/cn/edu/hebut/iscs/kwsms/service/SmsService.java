@@ -8,15 +8,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
+import android.provider.Telephony;
 
 import java.util.List;
 
 import cn.edu.hebut.iscs.kwsms.entity.ExpertInfo;
 import cn.edu.hebut.iscs.kwsms.entity.SendStateInfo;
 import cn.edu.hebut.iscs.kwsms.helper.ExpertDBManager;
+import cn.edu.hebut.iscs.kwsms.util.ConstantValue;
 import cn.edu.hebut.iscs.kwsms.util.DateTimeUtil;
+import cn.edu.hebut.iscs.kwsms.util.PrefUtils;
 
 public class SmsService extends Service {
+
+    private int mSendNum=0;
 
     private String SENT_SMS_ACTION = "SENT_SMS_ACTION";
     private String DELIVERED_SMS_ACTION = "DELIVERED_SMS_ACTION";
@@ -38,14 +43,21 @@ public class SmsService extends Service {
                     // 短信发送成功
                     ExpertDBManager.getInstance(SmsService.this)
                             .updateSendStateInfo(
-                                    intent.getStringExtra("EXPERT_CODE"), "2");
+                                    intent.getStringExtra("EXPERT_CODE"), "2"); //发送成功状态码为：1。现在为2，说明直接把状态码改成接收失败(2)里面了。
+                                                                                    //这里把状态码修改为：4(发送中)
                     break;
                 default:
                     // 短信发送失败
                     ExpertDBManager.getInstance(SmsService.this)
                             .updateSendStateInfo(
-                                    intent.getStringExtra("EXPERT_CODE"), "3");
+                                    intent.getStringExtra("EXPERT_CODE"), "3"); //发送失败状态码为：3
                     break;
+            }
+
+            //标记当前每一条短信已经发送出去后
+            mSendNum++;
+            if(mSendNum>= intent.getIntExtra("listlenght", 0)){     //如果当前短信全部发送完毕，设置标记为SEND_SUCCESS为true
+                PrefUtils.setBoolean(getApplicationContext(), ConstantValue.SEND_SUCCESS,true);
             }
         }
     };
@@ -58,7 +70,8 @@ public class SmsService extends Service {
         public void onReceive(Context context, Intent intent) {
             // 对方已接受短信
             ExpertDBManager.getInstance(context).updateSendStateInfo(
-                    intent.getStringExtra("EXPERT_CODE"), "1");
+                    intent.getStringExtra("EXPERT_CODE"), "1");     //对方已经接收短信，状态码改为1(发送成功)
+
         }
     };
 
@@ -74,6 +87,7 @@ public class SmsService extends Service {
 		 * 注册广播
 		 */
 
+        PrefUtils.setBoolean(getApplicationContext(), ConstantValue.SEND_SUCCESS,false);    //设置发送完毕的状态码为false。开始发送短信
 
         registerReceiver(sentSmsBr, new IntentFilter(SENT_SMS_ACTION));
         registerReceiver(backSmsBr, new IntentFilter(DELIVERED_SMS_ACTION));
@@ -100,7 +114,7 @@ public class SmsService extends Service {
                 SendStateInfo sendStateInfo = new SendStateInfo();
                 sendStateInfo.setExpertCode(expertInfo.getExpertCode());
                 sendStateInfo.setMsgId(smsCount + "");
-                sendStateInfo.setStatus("0");
+                sendStateInfo.setStatus("4");           //选择发送后，把状态都写成0；修改为4：接收失败
                 sendStateInfo.setTime(DateTimeUtil.longTimeToStrDate(
                         System.currentTimeMillis(), DateTimeUtil.format_1));
                 ExpertDBManager.getInstance(SmsService.this).saveSendStateInfo(
@@ -109,6 +123,7 @@ public class SmsService extends Service {
                 smsCount++;
 
             }
+
 
         }
         return super.onStartCommand(intent, flags, startId);

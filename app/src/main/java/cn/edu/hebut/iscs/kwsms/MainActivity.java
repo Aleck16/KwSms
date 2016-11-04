@@ -2,6 +2,7 @@ package cn.edu.hebut.iscs.kwsms;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -13,6 +14,13 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cn.edu.hebut.iscs.kwsms.entity.ExpertInfo;
 import cn.edu.hebut.iscs.kwsms.helper.ExpertDBManager;
+import cn.edu.hebut.iscs.kwsms.receiver.AutoUpdateReceiver;
+import cn.edu.hebut.iscs.kwsms.receiver.MessageReceiver;
+import cn.edu.hebut.iscs.kwsms.service.AutoReplyService;
+import cn.edu.hebut.iscs.kwsms.service.AutoUpdateService;
+import cn.edu.hebut.iscs.kwsms.service.StartAutoReplyService;
+import cn.edu.hebut.iscs.kwsms.util.ConstantValue;
+import cn.edu.hebut.iscs.kwsms.util.PrefUtils;
 import cn.edu.hebut.iscs.kwsms.util.ToastUtil;
 
 public class MainActivity extends Activity {
@@ -30,12 +38,24 @@ public class MainActivity extends Activity {
 
     private List<ExpertInfo> list;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         list = ExpertDBManager.getInstance(MainActivity.this).loadExpertInfo();
+
+        //启动自动回复服务
+        Intent intent=new Intent(this, StartAutoReplyService.class);
+        startService(intent);       //启动服务
+        //启动自动回复服务
+        Intent intentAuto=new Intent(this, AutoUpdateService.class);
+        startService(intentAuto);       //启动服务
+
+        PrefUtils.setBoolean(this, ConstantValue.AUTO_SEND_SUCCESS,true);    //标记自动回复正在进行
+        PrefUtils.setBoolean(this, ConstantValue.SEND_SUCCESS,true);    //标记自动回复正在进行
+
     }
 
     @OnClick({R.id.imports, R.id.send, R.id.reply, R.id.export, R.id.db_operation})
@@ -88,4 +108,5 @@ public class MainActivity extends Activity {
         super.onResume();
         list = ExpertDBManager.getInstance(MainActivity.this).loadExpertInfo();
     }
+
 }

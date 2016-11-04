@@ -45,6 +45,7 @@ public class ExpertDBManager {
         values.put("TELE", expertInfo.getTel());
         values.put("NAME", expertInfo.getName());
         values.put("MSG_CONTENT", expertInfo.getMsgContent());
+        values.put("AUTO_REPLY_CONTENT", expertInfo.getAutoReplyContent());
         return st.insert(DBManager.EXPERT_TABLE, values);
     }
 
@@ -69,6 +70,8 @@ public class ExpertDBManager {
                         .getColumnIndex("TELE")));
                 expertInfo.setMsgContent(cursor.getString(cursor
                         .getColumnIndex("MSG_CONTENT")));
+                expertInfo.setAutoReplyContent(cursor.getString(cursor
+                        .getColumnIndex("AUTO_REPLY_CONTENT")));
                 return expertInfo;
             }
         }, "SELECT * FROM EXPERT_TABLE", null);
@@ -247,6 +250,9 @@ public class ExpertDBManager {
                         replyStateInfo.setTellnExpertTable(cursor
                                 .getString(cursor
                                         .getColumnIndex("TELLN_EXPERT_TABLE")));
+                        replyStateInfo.setAutoReplyNum(cursor
+                                .getInt(cursor
+                                        .getColumnIndex("AUTO_REPLY_NUM")));
                         return replyStateInfo;
                     }
                 }, "SELECT * FROM REPLY_TABLE ORDER BY REPLY_TIME DESC", null);
@@ -365,6 +371,39 @@ public class ExpertDBManager {
                             }
                         },
                         "SELECT * FROM EXPERT_TABLE WHERE EXPERT_CODE NOT IN (SELECT EXPERT_CODE FROM SEND_STATUS_TABLE)",
+                        null);
+        return list;
+    }
+
+    /**
+     * 获取回复y的专家列表且没有自动回复用户名和密码，并返回，为了给自动回复使用
+     * select * from EXPERT_TABLE as e inner join REPLY_TABLE as r on e.TELE=r.TEL where r.AUTO_REPLY_NUM=2
+     */
+    public List<ExpertInfo> queryAutoReplyList(){
+        SQLiteTemplate st = SQLiteTemplate.getInstance(dbManager, false);
+        List<ExpertInfo> list = st
+                .queryForList(
+                        new SQLiteTemplate.RowMapper<ExpertInfo>() {
+
+                            @Override
+                            public ExpertInfo mapRow(Cursor cursor, int index) {
+                                ExpertInfo expertInfo = new ExpertInfo();
+                                expertInfo.setId(cursor.getInt(cursor
+                                        .getColumnIndex("ID")));
+                                expertInfo
+                                        .setExpertCode(cursor.getString(cursor
+                                                .getColumnIndex("EXPERT_CODE")));
+                                expertInfo.setName(cursor.getString(cursor
+                                        .getColumnIndex("NAME")));
+                                expertInfo.setTel(cursor.getString(cursor
+                                        .getColumnIndex("TELE")));
+                                expertInfo
+                                        .setMsgContent(cursor.getString(cursor
+                                                .getColumnIndex("AUTO_REPLY_CONTENT")));
+                                return expertInfo;
+                            }
+                        },
+                        "select * from EXPERT_TABLE as e inner join REPLY_TABLE as r on e.TELE=r.TEL where r.AUTO_REPLY_NUM=2",
                         null);
         return list;
     }
@@ -493,4 +532,57 @@ public class ExpertDBManager {
                 new String[] { replyStateInfo.getTel() });
     }
 
+    /**
+     * 已经自动回复，更改标记字段AUTO_REPLY_NUM为1
+     * 需要自动回复（相当于专家已经回复了y），更改标识字段AUTO_REPLY_NUM为2
+     *tel:电话号码
+     */
+    public int updateAutoReplyNum(String tel,int auto_reply_code) {
+        SQLiteTemplate st = SQLiteTemplate.getInstance(dbManager, false);
+        ContentValues values = new ContentValues();
+        values.put("AUTO_REPLY_NUM", auto_reply_code);
+        return st.update(DBManager.REPLY_TABLE, values, "TEL=?", new String[] { tel });
+    }
+
+    /**
+     * 通过电话号码获得自动回复标记
+     *tel:电话号码
+     */
+    public int getIsReply(String tel) {
+        SQLiteTemplate st = SQLiteTemplate.getInstance(dbManager, false);
+        ReplyStateInfo replyStateInfo = st.queryForObject(
+                new SQLiteTemplate.RowMapper<ReplyStateInfo>() {
+
+                    @Override
+                    public ReplyStateInfo mapRow(Cursor cursor, int index) {
+                        ReplyStateInfo replyStateInfo = new ReplyStateInfo();
+                        replyStateInfo.setAutoReplyNum(cursor.getInt(cursor
+                                .getColumnIndex("AUTO_REPLY_NUM")));
+                        return replyStateInfo;
+                    }
+                }, "SELECT AUTO_REPLY_NUM FROM REPLY_TABLE WHERE TEL=?",
+                        new String[] { tel });
+        return replyStateInfo.getAutoReplyNum();
+    }
+
+    /**
+     * 通过电话号码获得自动回复的内容
+     *tel:标准11位电话号码
+     */
+    public String getAutoReplyContent(String tel) {
+        SQLiteTemplate st = SQLiteTemplate.getInstance(dbManager, false);
+        ReplyStateInfo replyStateInfo = st.queryForObject(
+                new SQLiteTemplate.RowMapper<ReplyStateInfo>() {
+
+                    @Override
+                    public ReplyStateInfo mapRow(Cursor cursor, int index) {
+                        ReplyStateInfo replyStateInfo = new ReplyStateInfo();
+                        replyStateInfo.setAutoReplyContent(cursor.getString(cursor
+                                .getColumnIndex("AUTO_REPLY_CONTENT")));
+                        return replyStateInfo;
+                    }
+                }, "SELECT AUTO_REPLY_CONTENT FROM EXPERT_TABLE WHERE TELE=?",
+                new String[] { tel });
+        return replyStateInfo.getAutoReplyContent();
+    }
 }

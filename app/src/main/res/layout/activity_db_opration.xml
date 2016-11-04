@@ -13,5 +13,14 @@
         android:text="清空数据库"
         android:textColor="@color/white"
         android:textSize="20sp" />
+    <Button
+        android:id="@+id/btn_default"
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_for_btnthree"
+        android:text="复位设置"
+        android:textColor="@color/white"
+        android:textSize="20sp" />
 
 </LinearLayout>

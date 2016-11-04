@@ -19,6 +19,8 @@ import cn.edu.hebut.iscs.kwsms.adapter.SendExpertAdapter;
 import cn.edu.hebut.iscs.kwsms.entity.ExpertInfo;
 import cn.edu.hebut.iscs.kwsms.helper.ExpertDBManager;
 import cn.edu.hebut.iscs.kwsms.service.SmsService;
+import cn.edu.hebut.iscs.kwsms.util.ConstantValue;
+import cn.edu.hebut.iscs.kwsms.util.PrefUtils;
 import cn.edu.hebut.iscs.kwsms.util.ToastUtil;
 import cn.edu.hebut.iscs.kwsms.view.MyDialog;
 import cn.edu.hebut.iscs.kwsms.view.MyProgressDialog;
@@ -29,7 +31,7 @@ import cn.edu.hebut.iscs.kwsms.view.MyProgressDialog;
 public class SendSmsResultActivity extends BaseTitleActivity {
     @BindView(R.id.textView_send_num)
     TextView textViewSendNum;
-    @BindView(R.id.listView_send_sms)
+    @BindView(R.id.listView_send_sms)   //未发送的ListView
     ListView listViewSendSms;
     @BindView(R.id.rb_not_send)
     RadioButton rbNotSend;
@@ -42,16 +44,25 @@ public class SendSmsResultActivity extends BaseTitleActivity {
     @BindView(R.id.radio_group_send)
     RadioGroup radioGroupSend;
 
-
     // 不同发送状态的专家信息
+    /**
+     * notSendlist：还未发送, sendSuccesslist：发送成功, sendFalselist：发送失败,
+     acceptFalselist：接收失败;
+     */
     private List<ExpertInfo> notSendlist, sendSuccesslist, sendFalselist,
             acceptFalselist;
-    // 要发送的专家信息
-    private List<ExpertInfo> list;
-    private ExpertAdapter successExpertAdapter;
-    private SendExpertAdapter sendExpertAdapter;
+    private List<ExpertInfo> list;          // 选中发送中的（要发送的专家信息）
+    private List<ExpertInfo> newlist;          // 选中发送中的（要发送的专家信息）
+    private ExpertAdapter successExpertAdapter;         //发送成功栏目显示的内容
+    private SendExpertAdapter sendExpertAdapter;         //还未发送栏目显示的内容
+
+    private SendExpertAdapter sendExpertAdapterShow;    //显示在未发送栏目里面的列表：等于数据库里面未发送的减去发送中的。
+
+    private SendExpertAdapter sendReceiveFailExpertAdapter; //单独建一个接收失败的适配器
     // 短信发送状态，配合底部按钮使用
-    public int showStatus = 0;
+
+    //当前显示的页面
+    public int showStatus = 0;  //0:未发送页面；1：发送成功页面；2：接收失败页面；3：发送失败页面； 默认为未发送页面
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,7 +74,10 @@ public class SendSmsResultActivity extends BaseTitleActivity {
         initRadioGroup();
     }
 
+
     private void initUI() {
+
+        PrefUtils.setBoolean(getApplicationContext(), ConstantValue.SEND_SUCCESS,true); //设置正在发送中的短信是否完成状态码，默认为true（完成）
 
         sendSuccesslist = new ArrayList<ExpertInfo>();
         sendFalselist = new ArrayList<ExpertInfo>();
@@ -73,10 +87,18 @@ public class SendSmsResultActivity extends BaseTitleActivity {
 
         initList();
         sendExpertAdapter = new SendExpertAdapter(SendSmsResultActivity.this);
-        sendExpertAdapter.addAll(notSendlist);
+        sendExpertAdapter.clear();
+        sendExpertAdapter.addAll(notSendlist);          //添加还未发送列表到sendExpertAdapter中
+
+
+        sendReceiveFailExpertAdapter = new SendExpertAdapter(SendSmsResultActivity.this);
+        sendReceiveFailExpertAdapter.addAll(acceptFalselist);   //添加接收失败列表到sendReceiveFailExpertAdapter中
+
         successExpertAdapter = new ExpertAdapter(SendSmsResultActivity.this);
         successExpertAdapter.addAll(sendSuccesslist);
-        list = sendExpertAdapter.getList();
+        list.clear();   //清除之前的
+//        list = sendExpertAdapter.getList();     //未发送的和发送失败的
+        //将还未发送列表显示到界面中
         listViewSendSms.setAdapter(sendExpertAdapter);
         textViewSendNum.setText("未发送人数为：" + notSendlist.size());
     }
@@ -97,8 +119,29 @@ public class SendSmsResultActivity extends BaseTitleActivity {
                                 switch (type) {
                                     case 0:
                                         break;
-                                    case 1:
-                                        sendSMSAsyncTask();
+                                    case 1:         //发送按钮
+
+                                        if(PrefUtils.getBoolean(getApplicationContext(), ConstantValue.AUTO_SEND_SUCCESS,false)&&PrefUtils.getBoolean(getApplicationContext(),ConstantValue.SEND_SUCCESS,false)){
+                                            sendSMSAsyncTask();     //调用发送短信事件
+                                        }else if(PrefUtils.getBoolean(getApplicationContext(),ConstantValue.SEND_SUCCESS,false)){
+                                            ToastUtil.showToast(SendSmsResultActivity.this,"自动回复进行中...请等待发送完后再继续发送！");
+                                        }else{
+                                            ToastUtil.showToast(SendSmsResultActivity.this,"短信正在发送，请等待发送完后再继续发送！");
+                                        }
+
+
+                                        //更新显示内容，将刚刚选中的移除
+//                                        for (ExpertInfo expertInfo : list) {
+//                                            ExpertDBManager.getInstance(SendSmsResultActivity.this)
+//                                                    .updateSendStateInfo(
+//                                                            expertInfo.getExpertCode(), "3");   //将发送中的短信放到发送失败里面，下次缓冲就直接发送了。将状态码改为发送中，发送失败状态码为：3
+//                                            notSendlist.remove(expertInfo); //移除正在发送中的
+//                                            sendExpertAdapter.remove(expertInfo);
+//                                        }
+//                                        sendExpertAdapter.notifyDataSetChanged();
+//                                        listViewSendSms.setAdapter(sendExpertAdapter);
+//                                        textViewSendNum.setText("未发送人数为：" + notSendlist.size());
+
                                     default:
                                         break;
                                 }
@@ -112,7 +155,7 @@ public class SendSmsResultActivity extends BaseTitleActivity {
     }
 
     /*
-     * 初始化个状态显示的数据
+     * 初始化各个状态显示的数据
      */
     public void initList() {
 
@@ -123,16 +166,34 @@ public class SendSmsResultActivity extends BaseTitleActivity {
         sendFalselist = ExpertDBManager.getInstance(SendSmsResultActivity.this)
                 .querySendResultList("3");
         notSendlist = ExpertDBManager.getInstance(SendSmsResultActivity.this)
-                .queryNoSendList();
-        notSendlist.addAll(ExpertDBManager.getInstance(
-                SendSmsResultActivity.this).querySendResultList("0"));
+                .queryNoSendList();     //获得没有发送的
+//        notSendlist.addAll(ExpertDBManager.getInstance(
+//                SendSmsResultActivity.this).querySendResultList("0"));      //获得发送失败的,状态号为0
     }
 
     /*
      * 发送短信
      */
     private void sendSMSAsyncTask() {
-        list = sendExpertAdapter.getList();
+//        sendExpertAdapter.setList();
+        list.clear();
+        if(showStatus==2){      //接收失败页面
+            newlist = sendReceiveFailExpertAdapter.getList();      //绑定接收失败的数据
+            for(ExpertInfo expertInfo:newlist){
+                list.add(expertInfo);
+            }
+        }else{                  //为还未发送页面
+            newlist = sendExpertAdapter.getList();                 //绑定为发送和发送失败的数据
+            for(ExpertInfo expertInfo:newlist){
+                list.add(expertInfo);
+            }
+        }
+        sendReceiveFailExpertAdapter.clearList();
+        sendReceiveFailExpertAdapter.clear();
+        sendReceiveFailExpertAdapter.addAll(acceptFalselist);
+        sendExpertAdapter.clearList();      //清空内部List
+        sendExpertAdapter.clear();
+        sendExpertAdapter.addAll(notSendlist);          //添加还未发送列表到sendExpertAdapter中
         new AsyncTask<Void, Void, Boolean>() {
 
             @Override
@@ -146,7 +207,6 @@ public class SendSmsResultActivity extends BaseTitleActivity {
             protected Boolean doInBackground(Void... params) {
 
                 if (list != null && list.size() > 0) {
-
                     // 跳转到发送短信服务service
                     Intent intent = new Intent(SendSmsResultActivity.this,
                             SmsService.class);
@@ -161,7 +221,7 @@ public class SendSmsResultActivity extends BaseTitleActivity {
                     intent.putExtras(budle);
                     intent.setAction("cn.edu.hebut.iscs.sms_service");
                     startService(intent);
-
+                    list.clear();       //清空上一次的list，继续封装数据发送
                     return true;
                 } else {
                     return false;
@@ -177,6 +237,8 @@ public class SendSmsResultActivity extends BaseTitleActivity {
                     list.clear();
                     sendExpertAdapter.getStateList().clear();
                     sendExpertAdapter.clear();
+                    sendReceiveFailExpertAdapter.getStateList().clear();
+                    sendReceiveFailExpertAdapter.clear();
                     initList();
                     switch (showStatus) {
                         case 0:
@@ -184,7 +246,8 @@ public class SendSmsResultActivity extends BaseTitleActivity {
                             textViewSendNum.setText("未发送人数为：" + notSendlist.size());
                             break;
                         case 2:
-                            sendExpertAdapter.addAll(acceptFalselist);
+                            //sendExpertAdapter.addAll(acceptFalselist);
+                            sendReceiveFailExpertAdapter.addAll(acceptFalselist);       //
                             textViewSendNum
                                     .setText("接收失败人数为：" + acceptFalselist.size());
                             break;
@@ -194,6 +257,7 @@ public class SendSmsResultActivity extends BaseTitleActivity {
                             break;
                     }
                     sendExpertAdapter.notifyDataSetChanged();
+                    sendReceiveFailExpertAdapter.notifyDataSetChanged();    //改变适配器绑定的内容
                 } else {
                     ToastUtil.showToast(SendSmsResultActivity.this,
                             "未选中短信，请选择你要发送的短信！");
@@ -202,6 +266,8 @@ public class SendSmsResultActivity extends BaseTitleActivity {
         }.execute();
         sendExpertAdapter.getStateList().clear();
         sendExpertAdapter.clear();
+        sendReceiveFailExpertAdapter.getStateList().clear();
+        sendReceiveFailExpertAdapter.clear();
     }
 
     /*
@@ -232,11 +298,24 @@ public class SendSmsResultActivity extends BaseTitleActivity {
                                 SendSmsResultActivity.this)
                                 .querySendResultList("2");
                         showStatus = 2;
-                        sendExpertAdapter.clear();
-                        sendExpertAdapter.addAll(acceptFalselist);
-                        sendExpertAdapter.notifyDataSetChanged();
-                        listViewSendSms.setAdapter(sendExpertAdapter);
+                        sendReceiveFailExpertAdapter.clear();
+                        sendReceiveFailExpertAdapter.addAll(acceptFalselist);
+                        sendReceiveFailExpertAdapter.notifyDataSetChanged();
+                        listViewSendSms.setAdapter(sendReceiveFailExpertAdapter);
                         textViewSendNum.setText("接收失败人数为：" + acceptFalselist.size());
+
+
+
+//                        getTitleTextViewRight().setVisibility(View.GONE);   //发送按钮隐藏
+//                        acceptFalselist = ExpertDBManager.getInstance(
+//                                SendSmsResultActivity.this)
+//                                .querySendResultList("2");
+//                        showStatus = 2;
+//                        successExpertAdapter.clear();
+//                        successExpertAdapter.addAll(acceptFalselist);
+//                        successExpertAdapter.notifyDataSetChanged();
+//                        listViewSendSms.setAdapter(successExpertAdapter);  //接收失败的ListView绑定数据
+//                        textViewSendNum.setText("接收失败人数为：" + acceptFalselist.size());
                         break;
                     case R.id.rb_send_false:
                         getTitleTextViewRight().setVisibility(View.VISIBLE);

@@ -20,6 +20,27 @@ public class ReplyStateInfo implements Serializable {
     private String isTelValid;
     //没有录入的电话，1为yes，2为no，3为其他
     private String tellnExpertTable;
+    //已经自动回复的次数
+    private int autoReplyNum;
+    //自动回复的内容
+    private String autoReplyContent;
+
+    public String getAutoReplyContent() {
+        return autoReplyContent;
+    }
+
+    public ReplyStateInfo setAutoReplyContent(String autoReplyContent) {
+        this.autoReplyContent = autoReplyContent;
+        return this;
+    }
+
+    public int getAutoReplyNum() {
+        return autoReplyNum;
+    }
+
+    public void setAutoReplyNum(int autoReplyNum) {
+        this.autoReplyNum = autoReplyNum;
+    }
 
     //	public String getId() {
 //		return id;

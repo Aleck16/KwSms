@@ -11,7 +11,8 @@ public class DataBaseHelper extends SDCardSQLiteOpenHelper {
 			+ "TELE TEXT NOT NULL,"
 			+ "NAME TEXT NOT NULL,"
 			+ "EXPERT_CODE TEXT UNIQUE NOT NULL,"
-			+ "MSG_CONTENT TEXT NOT NULL)";
+			+ "MSG_CONTENT TEXT NOT NULL,"
+			+ "AUTO_REPLY_CONTENT TEXT)";//AUTO_REPLY_CONTENT自动回复内容
 
 	public static final String CREATE_SEND_STATUS_TABLE = "CREATE TABLE SEND_STATUS_TABLE ("
 			+ "ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,"
@@ -27,7 +28,7 @@ public class DataBaseHelper extends SDCardSQLiteOpenHelper {
 			+ "REPLY_CONTENT TEXT,"
 			+ "REPLY_TIME TEXT,"
 			+ "YES_NO_OTHER TEXT,"
-			+ "IS_TEL_VALID TEXT," + "TELLN_EXPERT_TABLE TEXT)";
+			+ "IS_TEL_VALID TEXT," + "TELLN_EXPERT_TABLE TEXT," + "AUTO_REPLY_NUM INTEGER DEFAULT 0)";	//Auto_Reply_num：自动回复次数,默认值为0
 
 	public DataBaseHelper(Context context, String name, CursorFactory factory,
 			int version) {

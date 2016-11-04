@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.WRITE_SMS" />
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
 
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -49,6 +50,19 @@
                 <action android:name="cn.edu.hebut.iscs.sms_service" />
             </intent-filter>
         </service>
+
+
+
+        <service android:name=".service.StartAutoReplyService"/>
+
+        <service android:name=".service.AutoReplyService">
+            <intent-filter>
+                <action android:name="cn.edu.hebut.iscs.sms_service" />
+            </intent-filter>
+        </service>
+        <service android:name=".service.AutoUpdateService"/>
+        <receiver android:name=".receiver.AutoUpdateReceiver"/>
+
     </application>
 
 </manifest>

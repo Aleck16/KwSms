@@ -6,12 +6,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import cn.edu.hebut.iscs.kwsms.R;
 import cn.edu.hebut.iscs.kwsms.entity.ReplyStateInfo;
+import cn.edu.hebut.iscs.kwsms.helper.ExpertDBManager;
 import cn.edu.hebut.iscs.kwsms.util.DateTimeUtil;
 
 public class ReplyAdapter extends ArrayAdapter<ReplyStateInfo> {
@@ -52,6 +54,14 @@ public class ReplyAdapter extends ArrayAdapter<ReplyStateInfo> {
                         viewHolder.phoneNumber.setText(replyStateInfo.getTel());
                         viewHolder.code.setText("(" + replyStateInfo.getExpertCode() + ")");
                         viewHolder.state.setText("Y");
+//                        viewHolder.isReply.setVisibility(View.VISIBLE); //设置显示
+//                        //根据此电话号码从数据库中获取是否自动回复标记
+//
+//                        String tel=replyStateInfo.getTel().trim();
+//                        int p=ExpertDBManager.getInstance(this.getContext()).getIsReply(tel);
+//                        if(p>0){        //如果自动回复字段标记大于0，说明已经自动回复了
+//                            viewHolder.isReply.setChecked(true);        //设置已经自动回复
+//                        }
                         break;
                     case "2":
                         viewHolder.smsbody.setText(replyStateInfo.getReplyContent());
@@ -97,6 +107,8 @@ public class ReplyAdapter extends ArrayAdapter<ReplyStateInfo> {
         TextView date;
         @BindView(R.id.smsbody)
         TextView smsbody;
+        @BindView(R.id.isReply)
+        RadioButton isReply;
 
         ViewHolder(View view) {
             ButterKnife.bind(this, view);

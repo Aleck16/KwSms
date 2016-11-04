@@ -140,9 +140,9 @@ public class ImportExcelActivity extends BaseTitleActivity {
         sheetStudent = wb.getSheet(0); // 获取工作簿
 
         rowNum = sheetStudent.getRows();// 获取行数
-        if (sheetStudent.getColumns() >= 5) {
-            // 判断列数是否为5
-            for (int i = 1; i < rowNum; i++) {
+        if (sheetStudent.getColumns() >= 6) {
+            // 判断列数是否为6
+            for (int i = 1; i < rowNum; i++) {      //i=1开始，去掉了excel的标题行
                 if (sheetStudent.getCell(0, i).getContents() != null
                         && sheetStudent.getCell(1, i).getContents() != null
                         && sheetStudent.getCell(2, i).getContents() != null
@@ -161,6 +161,8 @@ public class ImportExcelActivity extends BaseTitleActivity {
                     expertInfo.setTel(sheetStudent.getCell(3, i).getContents());
                     expertInfo.setMsgContent(sheetStudent.getCell(4, i)
                             .getContents());
+                    expertInfo.setAutoReplyContent(sheetStudent.getCell(5, i)
+                            .getContents());
                     expertInfoList.add(expertInfo);
                 } else if (sheetStudent.getCell(0, i).getContents() != null && sheetStudent.getCell(0, i).getContents().length() != 0) {
 //                    非法数据
@@ -173,6 +175,8 @@ public class ImportExcelActivity extends BaseTitleActivity {
                             .setName(sheetStudent.getCell(2, i).getContents());
                     expertInfo.setTel(sheetStudent.getCell(3, i).getContents());
                     expertInfo.setMsgContent(sheetStudent.getCell(4, i)
+                            .getContents());
+                    expertInfo.setAutoReplyContent(sheetStudent.getCell(5, i)
                             .getContents());
                     expertIllegalInfoList.add(expertInfo);
                 }

@@ -1,12 +1,15 @@
 package cn.edu.hebut.iscs.kwsms;
 
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Button;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cn.edu.hebut.iscs.kwsms.db.DBManager;
+import cn.edu.hebut.iscs.kwsms.util.ConstantValue;
+import cn.edu.hebut.iscs.kwsms.util.PrefUtils;
 import cn.edu.hebut.iscs.kwsms.util.ToastUtil;
 import cn.edu.hebut.iscs.kwsms.view.MyDialog;
 
@@ -17,12 +20,23 @@ public class DbOperationActivity extends BaseTitleActivity {
     @BindView(R.id.db_delete)
     Button dbDelete;
 
+    private Button btn_default;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initSetContentView(R.layout.activity_db_opration);
         ButterKnife.bind(this);
         setTitleBarText("数据库操作");
+
+        btn_default=(Button)findViewById(R.id.btn_default);
+        btn_default.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PrefUtils.setBoolean(DbOperationActivity.this, ConstantValue.AUTO_SEND_SUCCESS,true);    //标记自动回复正在进行
+                PrefUtils.setBoolean(DbOperationActivity.this, ConstantValue.SEND_SUCCESS,true);    //标记自动回复正在进行
+            }
+        });
     }
 
     @OnClick(R.id.db_delete)
@@ -59,5 +73,8 @@ public class DbOperationActivity extends BaseTitleActivity {
         dialog.show();
 
     }
+
+
+
 
 }

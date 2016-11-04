@@ -52,7 +52,7 @@ public class ExportExcelActivity extends BaseTitleActivity {
     private String path;
     private List<ExpertInfo> noReplylist;
 
-    private Label bll0, bll1, bll2, bll3, bll4, bll5, bll6, bll7;
+    private Label bll0, bll1, bll2, bll3, bll4, bll5, bll6, bll7,bll8;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -246,6 +246,7 @@ public class ExportExcelActivity extends BaseTitleActivity {
             bll5 = new Label(5, 0, "回复内容");
             bll6 = new Label(6, 0, "回复结果");
             bll7 = new Label(7, 0, "专家电话");
+            bll8 = new Label(8, 0, "是否已经自动回复用户名和密码(1为是，0为否)");
             try {
                 wsUnKnow.addCell(bll0);
                 wsUnKnow.addCell(bll1);
@@ -255,6 +256,7 @@ public class ExportExcelActivity extends BaseTitleActivity {
                 wsUnKnow.addCell(bll5);
                 wsUnKnow.addCell(bll6);
                 wsUnKnow.addCell(bll7);
+                wsUnKnow.addCell(bll8);
             } catch (RowsExceededException e1) {
                 e1.printStackTrace();
             } catch (WriteException e1) {
@@ -268,6 +270,7 @@ public class ExportExcelActivity extends BaseTitleActivity {
             bll5 = new Label(5, 0, "回复内容");
             bll6 = new Label(6, 0, "回复结果");
             bll7 = new Label(7, 0, "专家电话");
+            bll8 = new Label(8, 0, "是否已经自动回复用户名和密码(1为是，0为否)");
             try {
                 wsY.addCell(bll0);
                 wsY.addCell(bll1);
@@ -277,6 +280,7 @@ public class ExportExcelActivity extends BaseTitleActivity {
                 wsY.addCell(bll5);
                 wsY.addCell(bll6);
                 wsY.addCell(bll7);
+                wsY.addCell(bll8);
             } catch (RowsExceededException e1) {
                 e1.printStackTrace();
             } catch (WriteException e1) {
@@ -290,6 +294,7 @@ public class ExportExcelActivity extends BaseTitleActivity {
             bll5 = new Label(5, 0, "回复内容");
             bll6 = new Label(6, 0, "回复结果");
             bll7 = new Label(7, 0, "专家电话");
+            bll8 = new Label(8, 0, "是否已经自动回复用户名和密码(1为是，0为否)");
             try {
                 wsN.addCell(bll0);
                 wsN.addCell(bll1);
@@ -299,6 +304,7 @@ public class ExportExcelActivity extends BaseTitleActivity {
                 wsN.addCell(bll5);
                 wsN.addCell(bll6);
                 wsN.addCell(bll7);
+                wsN.addCell(bll8);
             } catch (RowsExceededException e1) {
                 e1.printStackTrace();
             } catch (WriteException e1) {
@@ -312,6 +318,7 @@ public class ExportExcelActivity extends BaseTitleActivity {
             bll5 = new Label(5, 0, "回复内容");
             bll6 = new Label(6, 0, "回复结果");
             bll7 = new Label(7, 0, "专家电话");
+            bll8 = new Label(7, 0, "是否已经自动回复用户名和密码(1为是，0为否)");
             try {
                 wsO.addCell(bll0);
                 wsO.addCell(bll1);
@@ -321,6 +328,7 @@ public class ExportExcelActivity extends BaseTitleActivity {
                 wsO.addCell(bll5);
                 wsO.addCell(bll6);
                 wsO.addCell(bll7);
+                wsO.addCell(bll8);
             } catch (RowsExceededException e1) {
                 e1.printStackTrace();
             } catch (WriteException e1) {
@@ -342,6 +350,7 @@ public class ExportExcelActivity extends BaseTitleActivity {
                         bll5 = new Label(5, i, rpi.getReplyContent());
                         bll6 = new Label(6, i, "未匹配");
                         bll7 = new Label(7, i, rpi.getTellnExpertTable());
+                        bll8 = new Label(8, i, String.valueOf( rpi.getAutoReplyNum()));
                         try {
                             wsUnKnow.addCell(bll0);
                             wsUnKnow.addCell(bll1);
@@ -351,6 +360,7 @@ public class ExportExcelActivity extends BaseTitleActivity {
                             wsUnKnow.addCell(bll5);
                             wsUnKnow.addCell(bll6);
                             wsUnKnow.addCell(bll7);
+                            wsUnKnow.addCell(bll8);
                         } catch (RowsExceededException e1) {
                             e1.printStackTrace();
                         } catch (WriteException e1) {
@@ -367,6 +377,7 @@ public class ExportExcelActivity extends BaseTitleActivity {
                         bll5 = new Label(5, j, rpi.getReplyContent());
                         bll6 = new Label(6, j, "同意");
                         bll7 = new Label(7, j, rpi.getTellnExpertTable());
+                        bll8 = new Label(8, j, String.valueOf(rpi.getAutoReplyNum()));
                         try {
                             wsY.addCell(bll0);
                             wsY.addCell(bll1);
@@ -376,6 +387,7 @@ public class ExportExcelActivity extends BaseTitleActivity {
                             wsY.addCell(bll5);
                             wsY.addCell(bll6);
                             wsY.addCell(bll7);
+                            wsY.addCell(bll8);
                         } catch (RowsExceededException e1) {
                             e1.printStackTrace();
                         } catch (WriteException e1) {
@@ -392,6 +404,7 @@ public class ExportExcelActivity extends BaseTitleActivity {
                         bll5 = new Label(5, x, rpi.getReplyContent());
                         bll6 = new Label(6, x, "不同意");
                         bll7 = new Label(7, x, rpi.getTellnExpertTable());
+                        bll8 = new Label(8, x, String.valueOf(rpi.getAutoReplyNum()));
                         try {
                             wsN.addCell(bll0);
                             wsN.addCell(bll1);
@@ -401,6 +414,7 @@ public class ExportExcelActivity extends BaseTitleActivity {
                             wsN.addCell(bll5);
                             wsN.addCell(bll6);
                             wsN.addCell(bll7);
+                            wsN.addCell(bll8);
                         } catch (RowsExceededException e1) {
                             e1.printStackTrace();
                         } catch (WriteException e1) {
@@ -417,6 +431,7 @@ public class ExportExcelActivity extends BaseTitleActivity {
                         bll5 = new Label(5, y, rpi.getReplyContent());
                         bll6 = new Label(6, y, "回复其他");
                         bll7 = new Label(7, y, rpi.getTellnExpertTable());
+                        bll8 = new Label(8, y, String.valueOf(rpi.getAutoReplyNum()));
                         try {
                             wsO.addCell(bll0);
                             wsO.addCell(bll1);
@@ -426,6 +441,7 @@ public class ExportExcelActivity extends BaseTitleActivity {
                             wsO.addCell(bll5);
                             wsO.addCell(bll6);
                             wsO.addCell(bll7);
+                            wsO.addCell(bll8);
                         } catch (RowsExceededException e1) {
                             e1.printStackTrace();
                         } catch (WriteException e1) {

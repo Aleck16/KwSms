@@ -14,6 +14,16 @@ public class ExpertInfo implements Serializable {
 	private String expertCode;
 	private String tel;
 	private String msgContent;
+	private String autoReplyContent;		//自动回复的内容
+
+	public String getAutoReplyContent() {
+		return autoReplyContent;
+	}
+
+	public ExpertInfo setAutoReplyContent(String autoReplyContent) {
+		this.autoReplyContent = autoReplyContent;
+		return this;
+	}
 
 	public int getId() {
 		return id;
