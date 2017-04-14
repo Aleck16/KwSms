@@ -52,13 +52,15 @@ public class AutoReplyService extends Service {
                 case Activity.RESULT_OK:
                     // 短信发送成功
                     // 自动回复短信发送成功
-                    ExpertDBManager.getInstance(getApplicationContext()).updateAutoReplyNum(expertInfo.getTel(),3);   //3：表示正在自动回复中
+                    //自动回复的现在已经不再判断了，如果专家没有接受到，则可以再次发送Y，会继续自动回复的
+//                    ExpertDBManager.getInstance(getApplicationContext()).updateAutoReplyNum(expertInfo.getTel(),3);   //3：表示正在自动回复中
 
                     break;
                 default:
                     // 短信发送失败
                     // 状态码4：自动回复短信发送失败
-                    ExpertDBManager.getInstance(getApplicationContext()).updateAutoReplyNum(expertInfo.getTel(),4);   //4：
+                    //自动回复的现在已经不再判断了，如果专家没有接受到，则可以再次发送Y，会继续自动回复的
+//                    ExpertDBManager.getInstance(getApplicationContext()).updateAutoReplyNum(expertInfo.getTel(),4);   //4：
 
                     break;
             }
@@ -119,7 +121,8 @@ public class AutoReplyService extends Service {
                 setBackPendingIntent(expertInfo.getExpertCode());
 
                 //更新自动回复成功
-                ExpertDBManager.getInstance(getApplicationContext()).updateAutoReplyNum(expertInfo.getTel(),3);   //3：表示正在自动回复中
+                //自动回复的现在已经不再判断了，如果专家没有接受到，则可以再次发送Y，会继续自动回复的
+//                ExpertDBManager.getInstance(getApplicationContext()).updateAutoReplyNum(expertInfo.getTel(),3);   //3：表示正在自动回复中
 
 //                SendStateInfo sendStateInfo = new SendStateInfo();
 //                sendStateInfo.setExpertCode(expertInfo.getExpertCode());

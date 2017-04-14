@@ -3,6 +3,7 @@ package cn.edu.hebut.iscs.kwsms;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ListView;
 import android.widget.RadioButton;
@@ -31,6 +32,8 @@ import jxl.read.biff.BiffException;
  */
 public class ImportExcelActivity extends BaseTitleActivity {
 
+    private static final String TAG="ImportExcelActivity";
+
     @BindView(R.id.rb_legitimateDataNum)
     RadioButton rbLegitimateDataNum;
     @BindView(R.id.rb_illegalDataNum)
@@ -55,6 +58,7 @@ public class ImportExcelActivity extends BaseTitleActivity {
     private List<ExpertInfo> expertIllegalInfoList = new ArrayList<ExpertInfo>();
     //    存储失败数据
     private List<ExpertInfo> notExpertInfoList = new ArrayList<ExpertInfo>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -197,6 +201,7 @@ public class ImportExcelActivity extends BaseTitleActivity {
 
     }
 
+    //执行导入操作
     public void saveExcel() {
         new AsyncTask<Void, Void, Void>() {
 
@@ -210,14 +215,30 @@ public class ImportExcelActivity extends BaseTitleActivity {
 
             @Override
             protected Void doInBackground(Void... arg0) {
+                //遍历导入专家信息和导入REPLY_TABLE表中对应字段的信息
+                //EXPERT_CODE,NAME,TEL,IS_TEL_VALID即（专家编号，专家名字，电话号码，电话是否有效设置为1）这些字段
+                long default_time=100;
                 for (ExpertInfo expertInfo : expertInfoList) {
+                    default_time++;
                     long result = ExpertDBManager.getInstance(
                             ImportExcelActivity.this).saveExpertDBManager(
                             ImportExcelActivity.this, expertInfo);
-                    if (result == -1) {
-                        notExpertInfoList.add(expertInfo);
-                    } else if (result == 0 || result < -1) {
-                        notExpertInfoList.add(expertInfo);
+
+                    //如果此条数据插入到专家表中成功，则顺便插入到回复表中
+
+                    if(result>=1){         //result为受影响的行数，表示插入专家成功
+                        long reply_result = ExpertDBManager.getInstance(
+                                ImportExcelActivity.this).saveReplyExpertDBManager(
+                                ImportExcelActivity.this,"1475243379"+default_time+"", expertInfo);
+                        Log.d(TAG,"导入专家信息并插入到回复表中，一次受影响的行数reply_result="+reply_result);
+                        if(reply_result>=1){    //导入到回复表中成功
+//                            Log.d(TAG,"导入专家信息并插入到回复表中，一次受影响的行数reply_result="+reply_result);
+                        }
+                    }
+                    if (result == -1) { //导入失败
+                        notExpertInfoList.add(expertInfo);  //导入失败，将失败项添加到失败列表中
+                    } else if (result == 0 || result < -1) {    //导入失败
+                        notExpertInfoList.add(expertInfo);  //导入失败，将失败项添加到失败列表中
                     }
                 }
                 return null;

@@ -44,6 +44,8 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
+        //加载所有专家信息
         list = ExpertDBManager.getInstance(MainActivity.this).loadExpertInfo();
 
         //启动自动回复服务

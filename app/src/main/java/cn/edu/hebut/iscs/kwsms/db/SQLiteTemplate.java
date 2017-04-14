@@ -366,6 +366,7 @@ public class SQLiteTemplate {
     /**
      * 查询
      *
+     * 后两个参数格式："SELECT * FROM REPLY_TABLE WHERE YES_NO_OTHER=?",new String[] { status }
      * @param rowMapper
      * @param sql
      * @param selectionArgs

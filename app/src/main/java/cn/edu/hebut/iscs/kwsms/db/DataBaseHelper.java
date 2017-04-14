@@ -4,6 +4,8 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 
+import static cn.edu.hebut.iscs.kwsms.db.DBManager.DB_NAME;
+
 public class DataBaseHelper extends SDCardSQLiteOpenHelper {
 
 	public static final String CREATE_EXPERT_TABLE = "CREATE TABLE EXPERT_TABLE ("
@@ -44,6 +46,11 @@ public class DataBaseHelper extends SDCardSQLiteOpenHelper {
 
 	@Override
 	public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+		//数据库更新，直接删除所有的表，再重新建立表
+		db.execSQL("drop table if exists EXPERT_TABLE");
+		db.execSQL("drop table if exists SEND_STATUS_TABLE");
+		db.execSQL("drop table if exists REPLY_TABLE");
+		onCreate(db);
 	}
 
 	@Override

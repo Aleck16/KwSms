@@ -21,6 +21,8 @@ public class DbOperationActivity extends BaseTitleActivity {
     Button dbDelete;
 
     private Button btn_default;
+    private Button btn_defaultReply;
+    private Button btn_defaultSend;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,8 +35,29 @@ public class DbOperationActivity extends BaseTitleActivity {
         btn_default.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //清空正在自动回复状态码和正在发送状态码
                 PrefUtils.setBoolean(DbOperationActivity.this, ConstantValue.AUTO_SEND_SUCCESS,true);    //标记自动回复正在进行
-                PrefUtils.setBoolean(DbOperationActivity.this, ConstantValue.SEND_SUCCESS,true);    //标记自动回复正在进行
+                PrefUtils.setBoolean(DbOperationActivity.this, ConstantValue.SEND_SUCCESS,true);    //标记正在发送中正在进行
+            }
+        });
+
+        btn_defaultReply=(Button)findViewById(R.id.btn_defaultReply);
+        btn_defaultReply.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //清空正在自动回复状态码和正在发送状态码
+                PrefUtils.setBoolean(DbOperationActivity.this, ConstantValue.AUTO_SEND_SUCCESS,true);    //标记自动回复正在进行
+//                PrefUtils.setBoolean(DbOperationActivity.this, ConstantValue.SEND_SUCCESS,true);    //标记正在发送中正在进行
+            }
+        });
+
+        btn_defaultSend=(Button)findViewById(R.id.btn_defaultSend);
+        btn_defaultSend.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //清空正在自动回复状态码和正在发送状态码
+//                PrefUtils.setBoolean(DbOperationActivity.this, ConstantValue.AUTO_SEND_SUCCESS,true);    //标记自动回复正在进行
+                PrefUtils.setBoolean(DbOperationActivity.this, ConstantValue.SEND_SUCCESS,true);    //标记正在发送中正在进行
             }
         });
     }

@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cn.edu.hebut.iscs.kwsms.entity.ExpertInfo;
+import cn.edu.hebut.iscs.kwsms.entity.ReplyStateInfo;
 import cn.edu.hebut.iscs.kwsms.helper.ExpertDBManager;
 import cn.edu.hebut.iscs.kwsms.service.AutoReplyService;
 import cn.edu.hebut.iscs.kwsms.service.AutoUpdateService;
@@ -59,17 +60,24 @@ public class MessageReceiver extends BroadcastReceiver {
                 tel=address;
                 break;
         }
-        fullMessage="";
-        for(SmsMessage message:messages){
-            fullMessage+=message.getMessageBody();      //获取短信内容
-        }
-        fullMessage=fullMessage.trim();     //去掉短信前后空格
-        //Log.d("MessageReceier",address+fullMessage);        //打印短信内容
-        if("y".equals(fullMessage)||"Y".equals(fullMessage)){       //如果短信内容是"y"或者"Y",则启动自动回复服务
 
-            int flag = ExpertDBManager.getInstance(context).updateAutoReplyNum(tel,2);   //标记回复了y，等待自动回复用户名和密码,状态码为2
-            Log.d("flag","flag="+flag+tel);
-            //启动自动回复服务
+        if(ExpertDBManager.getInstance(context).isExpert(tel)){    //判断收到的号码是否为专家表里面，如果是就处理
+            fullMessage="";
+            for(SmsMessage message:messages){
+                fullMessage+=message.getMessageBody();      //获取短信内容
+            }
+            fullMessage=fullMessage.trim();     //去掉短信前后空格
+            //Log.d("MessageReceier",address+fullMessage);        //打印短信内容
+
+            int status=3;       //默认为回复其他
+
+            if("y".equals(fullMessage)||"Y".equals(fullMessage)||"Yes".equals(fullMessage)||"yes".equals(fullMessage)){       //如果短信内容是"y"或者"Y",则启动自动回复服务
+
+                int flag = ExpertDBManager.getInstance(context).updateAutoReplyNum(tel,2);   //标记回复了y，等待自动回复用户名和密码,状态码为2
+                status=1;       //标记回复y
+
+                Log.d("flag","flag="+flag+tel);
+                //启动自动回复服务
 //            Intent intentAuto=new Intent(context, AutoUpdateService.class);
 
 //            if(PrefUtils.getBoolean(context, ConstantValue.AUTO_SEND_SUCCESS,false)&&PrefUtils.getBoolean(context,ConstantValue.SEND_SUCCESS,false)){
@@ -78,12 +86,7 @@ public class MessageReceiver extends BroadcastReceiver {
 
 
 
-
-
-
-
-
-            //  启动一个Service
+                //  启动一个Service
 //            Intent serviceIntent = new Intent(context, AutoReplyService.class);
 //            serviceIntent.putExtra("address",address);      //address类型：手机号：+8615032763060
 //            String autoReplyContent=ExpertDBManager.getInstance(context).getAutoReplyContent(tel);  //手机号：15032763060
@@ -91,7 +94,29 @@ public class MessageReceiver extends BroadcastReceiver {
 //                serviceIntent.putExtra("replaycontent",autoReplyContent);       //回复的内容需要从数据库里面调用
 //                context.startService(serviceIntent);
 //            }
+            }else if("n".equals(fullMessage)||"N".equals(fullMessage)||"No".equals(fullMessage)||"no".equals(fullMessage)){
+                status=2;
+            }else {     //其他状态码为3，回复其他内容，设置其他
+                /**
+                 * 此处需要判断一下，如果专家之前回复过Y，且用户名和密码已经自动发送成功，即YES_NO_OTHER=1，且AUTO_REPLY_NUM=1
+                 * 此种情况主要针对：当我们自动回复了用户名和密码之后，庄家继续回复一条：“好的”，或“收到”等。
+                 */
+                ReplyStateInfo replyStateInfo = ExpertDBManager.getInstance(context).queryReplyInfo(tel);
+                if(replyStateInfo.getYesNoOther().equals("1")){  //此专家已经回复了Y，且用户名和密码已经自动回复了，现在再回复其他的信息，状态码不发生改变
+                    status=1;
+                }else{
+                    status=3;
+                }
+            }
+            //更新数据库，用户已经回复
+            int flag = ExpertDBManager.getInstance(context).updateReplyNum(tel,status);   //标记回复了y，等待自动回复用户名和密码,状态码为2
+            if(flag==1){
+                Log.d("","更新状态成功");
+            }
+
         }
+
+
     }
 
     /**

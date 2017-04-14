@@ -3,6 +3,7 @@ package cn.edu.hebut.iscs.kwsms;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.EditText;
@@ -22,9 +23,9 @@ import cn.edu.hebut.iscs.kwsms.entity.ExpertInfo;
 import cn.edu.hebut.iscs.kwsms.entity.ReplyStateInfo;
 import cn.edu.hebut.iscs.kwsms.entity.SmsInfo;
 import cn.edu.hebut.iscs.kwsms.helper.ExpertDBManager;
-import cn.edu.hebut.iscs.kwsms.service.AutoReplyService;
 import cn.edu.hebut.iscs.kwsms.service.SmsService;
-import cn.edu.hebut.iscs.kwsms.util.DateTimeUtil;
+import cn.edu.hebut.iscs.kwsms.util.ConstantValue;
+import cn.edu.hebut.iscs.kwsms.util.PrefUtils;
 import cn.edu.hebut.iscs.kwsms.util.SmsUtil;
 import cn.edu.hebut.iscs.kwsms.util.ToastUtil;
 import cn.edu.hebut.iscs.kwsms.view.MyBasicListDialog;
@@ -68,6 +69,8 @@ public class ShowReplySmsActivity extends BaseTitleActivity {
 
     // 要发送的专家信息
     private List<ExpertInfo> list;
+    // 要发送的专家信息
+    private List<ExpertInfo> newlist;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -101,7 +104,14 @@ public class ShowReplySmsActivity extends BaseTitleActivity {
                                     case 0:
                                         break;
                                     case 1:
-                                        sendSMSAsyncTask();
+                                        //发送之前判断一下，当前是否正在发送短信或者正在回复短息，以防止应用停止运行死机状态
+                                        if(PrefUtils.getBoolean(getApplicationContext(), ConstantValue.AUTO_SEND_SUCCESS,false)&&PrefUtils.getBoolean(getApplicationContext(),ConstantValue.SEND_SUCCESS,false)){
+                                            sendSMSAsyncTask();     //调用发送短信事件
+                                        }else if(PrefUtils.getBoolean(getApplicationContext(),ConstantValue.SEND_SUCCESS,false)){
+                                            ToastUtil.showToast(ShowReplySmsActivity.this,"自动回复进行中...请等待发送完后再继续发送！");
+                                        }else{
+                                            ToastUtil.showToast(ShowReplySmsActivity.this,"短信正在发送中，请等待发送完后再继续发送！");
+                                        }
                                     default:
                                         break;
                                 }
@@ -139,16 +149,7 @@ public class ShowReplySmsActivity extends BaseTitleActivity {
                     case "1":       //回复为有效
                         switch (replyAdapter.getItem(arg2).getYesNoOther()) {
                             case "1":       //回复为Yes
-                                //手动发送用户名和密码
-
-
-
-
-
-
-
-
-
+                                //将状态码设置为需要自动回复状态：AUTO_REPLY_NUM=2,表示等待自动回复用户名和密码
 
 
                                 final YesNoDailog dialogY = new YesNoDailog(
@@ -160,34 +161,59 @@ public class ShowReplySmsActivity extends BaseTitleActivity {
                                                 switch (type) {
                                                     case 0:
                                                         break;
-                                                    case 1:     //确认回复类型为YES
+                                                    case 1:     //确认发送用户名和密码，即将AUTO_REPLY_NUM设置为2，等待自动回复
 
                                                         /**
                                                          * 修改：将确认为回复Y，之前执行自动回复短信
                                                          */
-                                                        //确认为Y修改为发送自动回复内容
+
                                                         String address=replyAdapter.getItem(arg2).getTel();     //库里面调出来的11位号码
-                                                        Intent serviceIntent = new Intent(getApplicationContext(),AutoReplyService.class);
-                                                        serviceIntent.putExtra("address",address);      //address类型：手机号：+8615032763060
-                                                        String autoReplyContent=ExpertDBManager.getInstance(getApplicationContext()).getAutoReplyContent(address);  //手机号：15032763060
-                                                        if(!autoReplyContent.isEmpty()){        //如果自动回复内容不为空
-                                                            serviceIntent.putExtra("replaycontent",autoReplyContent);       //回复的内容需要从数据库里面调用
-                                                            getApplicationContext().startService(serviceIntent);
-                                                        }
-//                                                        ExpertDBManager.getInstance(
-//                                                                ShowReplySmsActivity.this)
-//                                                                .updateReplyYesNo(
-//                                                                        "1",
-//                                                                        replyAdapter.getItem(
-//                                                                                arg2)
-//                                                                                .getTel(),
-//                                                                        null);
-//                                                        initAdapter();
-//                                                        replyAdapter.clear();
-//                                                        replyAdapter.addAll(replyOtherlist);
-//                                                        replyAdapter.notifyDataSetChanged();
+
+                                                        //更新数据库，用户回复为Y
+//                                                        int flag = ExpertDBManager.getInstance(ShowReplySmsActivity.this).updateReplyNum(address,1);   //回复内容状态码设置为1：表示回复为Y
+
+                                                        //更新状态码为等待发送自动回复的用户名和密码
+                                                        int flag = ExpertDBManager.getInstance(ShowReplySmsActivity.this).updateAutoReplyNum(address,2);   //标记回复了y，等待自动回复用户名和密码,状态码为2
+
+
+
+
+
+
+
+
+
+
+//                                                        //确认为Y修改为发送自动回复内容
+//                                                        String address=replyAdapter.getItem(arg2).getTel();     //库里面调出来的11位号码
+//                                                        Intent serviceIntent = new Intent(getApplicationContext(),AutoReplyService.class);
+//                                                        serviceIntent.putExtra("address",address);      //address类型：手机号：+8615032763060
+//                                                        String autoReplyContent=ExpertDBManager.getInstance(getApplicationContext()).getAutoReplyContent(address);  //手机号：15032763060
+//                                                        if(!autoReplyContent.isEmpty()){        //如果自动回复内容不为空
+//                                                            serviceIntent.putExtra("replaycontent",autoReplyContent);       //回复的内容需要从数据库里面调用
+//                                                            getApplicationContext().startService(serviceIntent);
+//                                                        }
+////                                                        ExpertDBManager.getInstance(
+////                                                                ShowReplySmsActivity.this)
+////                                                                .updateReplyYesNo(
+////                                                                        "1",
+////                                                                        replyAdapter.getItem(
+////                                                                                arg2)
+////                                                                                .getTel(),
+////                                                                        null);
+////                                                        initAdapter();
+////                                                        replyAdapter.clear();
+////                                                        replyAdapter.addAll(replyOtherlist);
+////                                                        replyAdapter.notifyDataSetChanged();
                                                         break;
                                                     case 2:         //确认回复类型为No
+
+                                                        address=replyAdapter.getItem(arg2).getTel();     //库里面调出来的11位号码
+
+                                                        //更新数据库，用户回复为Y
+                                                        flag = ExpertDBManager.getInstance(ShowReplySmsActivity.this).updateReplyNum(address,2);   //回复内容状态码设置为2：表示回复为N
+
+
 //                                                        ExpertDBManager.getInstance(
 //                                                                ShowReplySmsActivity.this)
 //                                                                .updateReplyYesNo(
@@ -205,7 +231,7 @@ public class ShowReplySmsActivity extends BaseTitleActivity {
                                                         break;
                                                 }
                                             }
-                                        }, "是否发送自动回复内容（即对应专家的用户名和密码）？", replyAdapter.getItem(arg2)
+                                        }, "Y表示重新发送用户名和密码，N表示确认为回复N", replyAdapter.getItem(arg2)
                                         .getReplyContent());
                                 dialogY.show();
 
@@ -244,34 +270,54 @@ public class ShowReplySmsActivity extends BaseTitleActivity {
                                                 switch (type) {
                                                     case 0:
                                                         break;
-                                                    case 1:     //确认回复类型为YES
+                                                    case 1:     //回复其他里面，确认回复类型为YES
 
                                                         /**
                                                          * 修改：将确认为回复Y，之前执行自动回复短信
                                                          */
-                                                        //确认为Y修改为发送自动回复内容
+
                                                         String address=replyAdapter.getItem(arg2).getTel();     //库里面调出来的11位号码
-                                                        Intent serviceIntent = new Intent(getApplicationContext(),AutoReplyService.class);
-                                                        serviceIntent.putExtra("address",address);      //address类型：手机号：+8615032763060
-                                                        String autoReplyContent=ExpertDBManager.getInstance(getApplicationContext()).getAutoReplyContent(address);  //手机号：15032763060
-                                                        if(!autoReplyContent.isEmpty()){        //如果自动回复内容不为空
-                                                            serviceIntent.putExtra("replaycontent",autoReplyContent);       //回复的内容需要从数据库里面调用
-                                                            getApplicationContext().startService(serviceIntent);
-                                                        }
-                                                        ExpertDBManager.getInstance(
-                                                                ShowReplySmsActivity.this)
-                                                                .updateReplyYesNo(
-                                                                        "1",
-                                                                        replyAdapter.getItem(
-                                                                                arg2)
-                                                                                .getTel(),
-                                                                        null);
+
+                                                        //更新数据库，用户回复为Y
+                                                        int flag = ExpertDBManager.getInstance(ShowReplySmsActivity.this).updateReplyNum(address,1);   //回复内容状态码设置为1：表示回复为Y
+
+                                                        //更新状态码为等待发送自动回复的用户名和密码
+                                                        flag = ExpertDBManager.getInstance(ShowReplySmsActivity.this).updateAutoReplyNum(address,2);   //标记回复了y，等待自动回复用户名和密码,状态码为2
+
+                                                        //更新列表
                                                         initAdapter();
                                                         replyAdapter.clear();
                                                         replyAdapter.addAll(replyOtherlist);
                                                         replyAdapter.notifyDataSetChanged();
+
+
+//                                                        /**
+//                                                         * 修改：将确认为回复Y，之前执行自动回复短信
+//                                                         */
+//                                                        //确认为Y修改为发送自动回复内容
+//                                                        String address=replyAdapter.getItem(arg2).getTel();     //库里面调出来的11位号码
+//                                                        Intent serviceIntent = new Intent(getApplicationContext(),AutoReplyService.class);
+//                                                        serviceIntent.putExtra("address",address);      //address类型：手机号：+8615032763060
+//                                                        String autoReplyContent=ExpertDBManager.getInstance(getApplicationContext()).getAutoReplyContent(address);  //手机号：15032763060
+//                                                        if(!autoReplyContent.isEmpty()){        //如果自动回复内容不为空
+//                                                            serviceIntent.putExtra("replaycontent",autoReplyContent);       //回复的内容需要从数据库里面调用
+//                                                            getApplicationContext().startService(serviceIntent);
+//                                                        }
+//                                                        ExpertDBManager.getInstance(
+//                                                                ShowReplySmsActivity.this)
+//                                                                .updateReplyYesNo(
+//                                                                        "1",
+//                                                                        replyAdapter.getItem(
+//                                                                                arg2)
+//                                                                                .getTel(),
+//                                                                        null);
+//                                                        initAdapter();
+//                                                        replyAdapter.clear();
+//                                                        replyAdapter.addAll(replyOtherlist);
+//                                                        replyAdapter.notifyDataSetChanged();
                                                         break;
                                                     case 2:         //确认回复类型为No
+                                                        //修改状态码为2
                                                         ExpertDBManager.getInstance(
                                                                 ShowReplySmsActivity.this)
                                                                 .updateReplyYesNo(
@@ -280,6 +326,7 @@ public class ShowReplySmsActivity extends BaseTitleActivity {
                                                                                 arg2)
                                                                                 .getTel(),
                                                                         null);
+                                                        //更新列表
                                                         initAdapter();
                                                         replyAdapter.clear();
                                                         replyAdapter.addAll(replyOtherlist);
@@ -400,6 +447,8 @@ public class ShowReplySmsActivity extends BaseTitleActivity {
         });
         sendExpertAdapter = new SendExpertAdapter(ShowReplySmsActivity.this);
         listViewNoReplySms.setAdapter(sendExpertAdapter);
+
+        //未回复列表添加点击事件
         listViewNoReplySms.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
@@ -414,26 +463,37 @@ public class ShowReplySmsActivity extends BaseTitleActivity {
                                 switch (type) {
                                     case 0:
                                         break;
-                                    case 1:
+                                    case 1:     //将该专家确认为回复Y,并发送用户名和密码
 
-                                        ReplyStateInfo replyStateInfo = new ReplyStateInfo();
-                                        replyStateInfo.setTel(sendExpertAdapter
-                                                .getItem(arg2).getTel());
-                                        replyStateInfo.setReplyTime(String.valueOf(System
-                                                .currentTimeMillis()));
-                                        replyStateInfo.setExpertCode(sendExpertAdapter
-                                                .getItem(arg2).getExpertCode());
-                                        replyStateInfo.setExpertName(sendExpertAdapter
-                                                .getItem(arg2).getName());
-                                        replyStateInfo.setIsTelValid("1");
-                                        replyStateInfo.setYesNoOther("1");
-
+                                        String address=sendExpertAdapter
+                                                .getItem(arg2).getTel();
+                                        //将状态码设置为1，表示回复为Y
                                         ExpertDBManager.getInstance(
-                                                ShowReplySmsActivity.this)
-                                                .saveReplyStateInfo(
-                                                        ShowReplySmsActivity.this,
-                                                        replyStateInfo);
+                                                ShowReplySmsActivity.this).updateReplyNum(address,1);
 
+                                        //更新状态码为等待发送自动回复的用户名和密码
+                                        int flag = ExpertDBManager.getInstance(ShowReplySmsActivity.this).updateAutoReplyNum(address,2);   //标记回复了y，等待自动回复用户名和密码,状态码为2
+
+
+//                                        ReplyStateInfo replyStateInfo = new ReplyStateInfo();
+//                                        replyStateInfo.setTel(sendExpertAdapter
+//                                                .getItem(arg2).getTel());
+//                                        replyStateInfo.setReplyTime(String.valueOf(System
+//                                                .currentTimeMillis()));
+//                                        replyStateInfo.setExpertCode(sendExpertAdapter
+//                                                .getItem(arg2).getExpertCode());
+//                                        replyStateInfo.setExpertName(sendExpertAdapter
+//                                                .getItem(arg2).getName());
+//                                        replyStateInfo.setIsTelValid("1");
+//                                        replyStateInfo.setYesNoOther("1");
+//
+//                                        ExpertDBManager.getInstance(
+//                                                ShowReplySmsActivity.this)
+//                                                .saveReplyStateInfo(
+//                                                        ShowReplySmsActivity.this,
+//                                                        replyStateInfo);
+
+                                        //更新列表显示数据
                                         initAdapter();
                                         noReplylist = ExpertDBManager.getInstance(
                                                 ShowReplySmsActivity.this)
@@ -445,28 +505,37 @@ public class ShowReplySmsActivity extends BaseTitleActivity {
                                                 + noReplylist.size());
                                         break;
                                     case 2:
-                                        ReplyStateInfo replyStateInfo1 = new ReplyStateInfo();
-                                        replyStateInfo1.setTel(sendExpertAdapter
-                                                .getItem(arg2).getTel());
-                                        replyStateInfo1.setReplyTime(DateTimeUtil
-                                                .longTimeToStrDate(
-                                                        System.currentTimeMillis(),
-                                                        DateTimeUtil.format_1));
-                                        replyStateInfo1.setReplyTime(String.valueOf(System
-                                                .currentTimeMillis()));
-                                        replyStateInfo1.setExpertCode(sendExpertAdapter
-                                                .getItem(arg2).getExpertCode());
-                                        replyStateInfo1
-                                                .setExpertName(sendExpertAdapter
-                                                        .getItem(arg2).getName());
-                                        replyStateInfo1.setIsTelValid("1");
-                                        replyStateInfo1.setYesNoOther("2");
 
+                                        address=sendExpertAdapter
+                                                .getItem(arg2).getTel();
+                                        //将状态码设置为2，表示回复为N
                                         ExpertDBManager.getInstance(
-                                                ShowReplySmsActivity.this)
-                                                .saveReplyStateInfo(
-                                                        ShowReplySmsActivity.this,
-                                                        replyStateInfo1);
+                                                ShowReplySmsActivity.this).updateReplyNum(address,2);
+
+
+//                                        ReplyStateInfo replyStateInfo1 = new ReplyStateInfo();
+//                                        replyStateInfo1.setTel(sendExpertAdapter
+//                                                .getItem(arg2).getTel());
+//                                        replyStateInfo1.setReplyTime(DateTimeUtil
+//                                                .longTimeToStrDate(
+//                                                        System.currentTimeMillis(),
+//                                                        DateTimeUtil.format_1));
+//                                        replyStateInfo1.setReplyTime(String.valueOf(System
+//                                                .currentTimeMillis()));
+//                                        replyStateInfo1.setExpertCode(sendExpertAdapter
+//                                                .getItem(arg2).getExpertCode());
+//                                        replyStateInfo1
+//                                                .setExpertName(sendExpertAdapter
+//                                                        .getItem(arg2).getName());
+//                                        replyStateInfo1.setIsTelValid("1");
+//                                        replyStateInfo1.setYesNoOther("2");
+//
+//                                        ExpertDBManager.getInstance(
+//                                                ShowReplySmsActivity.this)
+//                                                .saveReplyStateInfo(
+//                                                        ShowReplySmsActivity.this,
+//                                                        replyStateInfo1);
+                                        //更新列表显示数据
                                         initAdapter();
                                         noReplylist = ExpertDBManager.getInstance(
                                                 ShowReplySmsActivity.this)
@@ -482,7 +551,7 @@ public class ShowReplySmsActivity extends BaseTitleActivity {
                                 }
                             }
                         }, "请确认回复类型", sendExpertAdapter
-                        .getItem(arg2).getName() + "已电话回复");
+                        .getItem(arg2).getName() + "已电话回复(选择Y：将确认为回复Y，且发送用户名和密码)");
                 dialog.show();
             }
         });
@@ -492,7 +561,22 @@ public class ShowReplySmsActivity extends BaseTitleActivity {
      * 发送短信
      */
     private void sendSMSAsyncTask() {
-        list=sendExpertAdapter.getList();
+
+        list.clear();
+        newlist = sendExpertAdapter.getList();;      //绑定接收失败的数据
+        for(ExpertInfo expertInfo:newlist){
+            list.add(expertInfo);
+        }
+
+        sendExpertAdapter.getStateList().clear();
+        initAdapter();
+        listViewNoReplySms.setAdapter(sendExpertAdapter);
+        sendExpertAdapter.clear();
+        sendExpertAdapter.addAll(noReplylist);
+        sendExpertAdapter.notifyDataSetChanged();
+        textViewNum.setText("未回复的人数为：" + noReplylist.size());
+
+
         new AsyncTask<Void, Void, Boolean>() {
 
             @Override
@@ -550,6 +634,9 @@ public class ShowReplySmsActivity extends BaseTitleActivity {
         }.execute();
     }
 
+    /**
+     * 读取回复短信列表
+     */
     public void querySms() {
         new AsyncTask<Void, Void, Boolean>() {
 
@@ -562,7 +649,7 @@ public class ShowReplySmsActivity extends BaseTitleActivity {
 
             @Override
             protected Boolean doInBackground(Void... params) {
-                saveSms();
+                saveSms();      //将读取到的回复信息保存到回复表里面
                 return true;
             }
 
@@ -589,81 +676,145 @@ public class ShowReplySmsActivity extends BaseTitleActivity {
 
     public void saveSms() {
         SmsUtil smsUtil = new SmsUtil();
+        //读取所有的接收到的短信信息
         infos = smsUtil.getSmsInfo(ShowReplySmsActivity.this, ExpertDBManager
                 .getInstance(ShowReplySmsActivity.this).queryReplyLastTime());
+        Log.d("infos","infos的大小"+infos.size());
 
-        for (SmsInfo smsInfo : infos) {
+        for (SmsInfo smsInfo : infos) {     //遍历每一个号码发来的短信
+            //当前号码，在数据库里面是否已经存在，存在则返回次短信信息对象
             ReplyStateInfo theReplyStateInfo = ExpertDBManager.getInstance(
                     ShowReplySmsActivity.this).loadReplyStateInfo(
                     smsInfo.getPhoneNumber());
              //判断该电话用户是否已回复
-            if (theReplyStateInfo == null) {
-                ExpertInfo expertInfo = ExpertDBManager.getInstance(
-                        ShowReplySmsActivity.this).matchExpertInfo(
-                        smsInfo.getPhoneNumber());
+            /**
+             * 在这里修改：
+             * 导入专家信息时，顺便将回复表里面已经导入对应的
+             * EXPERT_CODE,NAME,TEL,IS_TEL_VALID即（专家编号，专家名字，电话号码，电话是否有效设置为1）这些字段
+             * 如果当前回复的号码在专家库里面，则直接更新内容。否则：执行插入语句
+             */
+
+
+            //回复表里面有此电话号码：
+            //则，更新REPLY_CONTENT,REPLY_TIME,YES_NO_OTHER(就是前三列和IS_TEL_VALID,和最后一列(AUTO_REPLY_NUM)不更新)
+            if (theReplyStateInfo != null) {        //回复表里存在此号码
+
+                String YesNoOther="0";
+                //判断当前号码回复的内容
+                switch (smsInfo.getSmsbody().trim()) {
+                    // 回复y
+                    case "Y":
+                    case "y":
+                    case "yes":
+                    case "YES":
+                    case "Yes":
+                        YesNoOther="1";
+                        break;
+                    // 回复n
+                    case "N":
+                    case "n":
+                    case "no":
+                    case "NO":
+                    case "No":
+                        YesNoOther="2";
+                        break;
+                    // 回复其他
+                    default:
+                        YesNoOther="3";
+                        break;
+                }
+                ExpertDBManager.getInstance(ShowReplySmsActivity.this)
+                        .updateExpertReplyResult(smsInfo.getSmsbody(),
+                                smsInfo.getDate(),YesNoOther, theReplyStateInfo);
+            }else{
+                //否则，回复表里没有此电话号码，则判断为非专家号码回复，则直接插入，
+                //字段和值为：TEL,REPLY_CONTENT,REPLY_TIME,YES_NO_OTHER(0),IS_TEL_VALID(2)
 
                 ReplyStateInfo replyStateInfo = new ReplyStateInfo();
                 replyStateInfo.setTel(smsInfo.getPhoneNumber());
                 replyStateInfo.setReplyTime(smsInfo.getDate());
                 replyStateInfo.setReplyContent(smsInfo.getSmsbody());
-                // 判断电话是否为专家电话
-                if (expertInfo == null) {
-                    // 无法匹配的
-                    replyStateInfo.setIsTelValid("2");
-                    replyStateInfo.setYesNoOther("0");
+                replyStateInfo.setIsTelValid("2");      //设置是否有效字段为2，表示无效回复
+                replyStateInfo.setYesNoOther("0");      //设置回复内容属性为0：表示不是专家回复的号码，所以不在yer和No和other范围类，设置为0
 
-                } else {
-                    replyStateInfo.setExpertCode(expertInfo.getExpertCode());
-                    replyStateInfo.setExpertName(expertInfo.getName());
-                    replyStateInfo.setIsTelValid("1");
-
-                    switch (smsInfo.getSmsbody().trim()) {
-                        // 回复y
-                        case "Y":
-                            replyStateInfo.setYesNoOther("1");
-                            break;
-                        case "y":
-                            replyStateInfo.setYesNoOther("1");
-                            break;
-                        case "yes":
-                            replyStateInfo.setYesNoOther("1");
-                            break;
-                        case "YES":
-                            replyStateInfo.setYesNoOther("1");
-                            break;
-                        case "Yes":
-                            replyStateInfo.setYesNoOther("1");
-                            break;
-                        // 回复n
-                        case "N":
-                            replyStateInfo.setYesNoOther("2");
-                            break;
-                        case "n":
-                            replyStateInfo.setYesNoOther("2");
-                            break;
-                        case "no":
-                            replyStateInfo.setYesNoOther("2");
-                            break;
-                        case "NO":
-                            replyStateInfo.setYesNoOther("2");
-                            break;
-                        case "No":
-                            replyStateInfo.setYesNoOther("2");
-                            break;
-                        // 回复其他
-                        default:
-                            replyStateInfo.setYesNoOther("3");
-                            break;
-                    }
-                }
-                ExpertDBManager.getInstance(ShowReplySmsActivity.this)
-                        .saveReplyStateInfo(ShowReplySmsActivity.this,
-                                replyStateInfo);
-            } else {
-                ExpertDBManager.getInstance(ShowReplySmsActivity.this)
-                        .updateMoreReplyResult(smsInfo.getSmsbody(),
-                                smsInfo.getDate(), theReplyStateInfo);
+                ExpertDBManager.getInstance(ShowReplySmsActivity.this).
+                        saveReplyStateInfo(ShowReplySmsActivity.this,replyStateInfo);
             }
+
+
+
+
+
+//            if (theReplyStateInfo == null) {        //回复表里面没有此电话号码，那就执行插入语句，将此信息插入到回复表里面
+//                //将此电话号码与专家表里面的号码匹配，如果存在则返回此电话号码的专家信息expertInfo
+//                ExpertInfo expertInfo = ExpertDBManager.getInstance(
+//                        ShowReplySmsActivity.this).matchExpertInfo(
+//                        smsInfo.getPhoneNumber());
+//
+//                ReplyStateInfo replyStateInfo = new ReplyStateInfo();
+//                replyStateInfo.setTel(smsInfo.getPhoneNumber());
+//                replyStateInfo.setReplyTime(smsInfo.getDate());
+//                replyStateInfo.setReplyContent(smsInfo.getSmsbody());
+//                // 判断电话是否为专家电话
+//                if (expertInfo == null) {       //当前号码不为专家表里的号码
+//                    // 无法匹配的
+//                    replyStateInfo.setIsTelValid("2");      //设置是否有效字段为2，表示无效回复
+//                    replyStateInfo.setYesNoOther("0");      //设置回复内容属性为0：表示不是专家回复的号码，所以不在yer和No和other范围类，设置为0
+//
+//                } else {                //当前号码是专家表里的号码
+//                    replyStateInfo.setExpertCode(expertInfo.getExpertCode());
+//                    replyStateInfo.setExpertName(expertInfo.getName());
+//                    replyStateInfo.setIsTelValid("1");
+//                    //判断当前号码回复的内容
+//                    switch (smsInfo.getSmsbody().trim()) {
+//                        // 回复y
+//                        case "Y":
+//                            replyStateInfo.setYesNoOther("1");
+//                            break;
+//                        case "y":
+//                            replyStateInfo.setYesNoOther("1");
+//                            break;
+//                        case "yes":
+//                            replyStateInfo.setYesNoOther("1");
+//                            break;
+//                        case "YES":
+//                            replyStateInfo.setYesNoOther("1");
+//                            break;
+//                        case "Yes":
+//                            replyStateInfo.setYesNoOther("1");
+//                            break;
+//                        // 回复n
+//                        case "N":
+//                            replyStateInfo.setYesNoOther("2");
+//                            break;
+//                        case "n":
+//                            replyStateInfo.setYesNoOther("2");
+//                            break;
+//                        case "no":
+//                            replyStateInfo.setYesNoOther("2");
+//                            break;
+//                        case "NO":
+//                            replyStateInfo.setYesNoOther("2");
+//                            break;
+//                        case "No":
+//                            replyStateInfo.setYesNoOther("2");
+//                            break;
+//                        // 回复其他
+//                        default:
+//                            replyStateInfo.setYesNoOther("3");
+//                            break;
+//                    }
+//                }
+//                ExpertDBManager.getInstance(ShowReplySmsActivity.this)
+//                        .saveReplyStateInfo(ShowReplySmsActivity.this,
+//                                replyStateInfo);
+//            } else {
+//                ExpertDBManager.getInstance(ShowReplySmsActivity.this)
+//                        .updateMoreReplyResult(smsInfo.getSmsbody(),
+//                                smsInfo.getDate(), theReplyStateInfo);
+//            }
+
+
         }
 
     }

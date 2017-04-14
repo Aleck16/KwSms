@@ -13,7 +13,7 @@ import android.database.sqlite.SQLiteDatabase;
  * 
  */
 public class DBManager {
-	public final static int VERSION = 2;
+	public final static int VERSION = 3;		//之前为2，现在修改为3。升级了一次
 	public final static String DB_NAME = "MOBILE_SMS.db";
 	public final static String EXPERT_TABLE = "EXPERT_TABLE";
 	public final static String SEND_STATUS_TABLE = "SEND_STATUS_TABLE";
